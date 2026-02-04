@@ -136,6 +136,19 @@ async function startGateway() {
     clawArgs(["config", "set", "--json", "gateway.trustedProxies", '["127.0.0.1","::1"]'])
   );
 
+  async function startGateway() {
+  if (gatewayProc) return;
+  if (!isConfigured()) throw new Error("Gateway cannot start: not configured");
+
+  fs.mkdirSync(STATE_DIR, { recursive: true });
+  fs.mkdirSync(WORKSPACE_DIR, { recursive: true });
+
+  // Ensure Railway reverse proxy is trusted (loopback only).
+  await runCmd(
+    OPENCLAW_NODE,
+    clawArgs(["config", "set", "--json", "gateway.trustedProxies", '["127.0.0.1","::1"]'])
+  );
+
   const args = [
     "gateway",
     "run",
@@ -161,6 +174,15 @@ async function startGateway() {
     },
   });
 
+  gatewayProc.on("error", (err) => {
+    console.error(`[gateway] spawn error: ${String(err)}`);
+    gatewayProc = null;
+  });
+
+  gatewayProc.on("exit", (code, signal) => {
+    console.error(`[gateway] exited code=${code} signal=${signal}`);
+    gatewayProc = null;
+  });
 }
 
   const args = [
