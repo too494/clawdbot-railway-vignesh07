@@ -161,7 +161,6 @@ async function startGateway() {
     },
   });
 
-  ...
 }
 
   const args = [
