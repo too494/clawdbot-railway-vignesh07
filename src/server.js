@@ -297,6 +297,8 @@ app.get("/setup", requireSetupAuth, (_req, res) => {
         <option value="openclaw.logs.tail">openclaw logs --tail N</option>
         <option value="openclaw.config.get">openclaw config get &lt;path&gt;</option>
         <option value="openclaw.version">openclaw --version</option>
+        <option value="openclaw.nodes.pending">openclaw nodes pending</option>
+        <option value="openclaw.nodes.approve">openclaw nodes approve &lt;requestId&gt;</option>
       </select>
       <input id="consoleArg" placeholder="Optional arg (e.g. 200, gateway.port)" style="flex: 1" />
       <button id="consoleRun" style="background:#0f172a">Run</button>
