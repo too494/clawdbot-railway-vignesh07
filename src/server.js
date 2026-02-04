@@ -136,19 +136,6 @@ async function startGateway() {
     clawArgs(["config", "set", "--json", "gateway.trustedProxies", '["127.0.0.1","::1"]'])
   );
 
-  async function startGateway() {
-  if (gatewayProc) return;
-  if (!isConfigured()) throw new Error("Gateway cannot start: not configured");
-
-  fs.mkdirSync(STATE_DIR, { recursive: true });
-  fs.mkdirSync(WORKSPACE_DIR, { recursive: true });
-
-  // Ensure Railway reverse proxy is trusted (loopback only).
-  await runCmd(
-    OPENCLAW_NODE,
-    clawArgs(["config", "set", "--json", "gateway.trustedProxies", '["127.0.0.1","::1"]'])
-  );
-
   const args = [
     "gateway",
     "run",
@@ -185,41 +172,7 @@ async function startGateway() {
   });
 }
 
-  const args = [
-    "gateway",
-    "run",
-    "--bind",
-    "loopback",
-    "--port",
-    String(INTERNAL_GATEWAY_PORT),
-    "--auth",
-    "token",
-    "--token",
-    OPENCLAW_GATEWAY_TOKEN,
-  ];
-
-  gatewayProc = childProcess.spawn(OPENCLAW_NODE, clawArgs(args), {
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      OPENCLAW_STATE_DIR: STATE_DIR,
-      OPENCLAW_WORKSPACE_DIR: WORKSPACE_DIR,
-      // Backward-compat aliases
-      CLAWDBOT_STATE_DIR: process.env.CLAWDBOT_STATE_DIR || STATE_DIR,
-      CLAWDBOT_WORKSPACE_DIR: process.env.CLAWDBOT_WORKSPACE_DIR || WORKSPACE_DIR,
-    },
-  });
-
-  gatewayProc.on("error", (err) => {
-    console.error(`[gateway] spawn error: ${String(err)}`);
-    gatewayProc = null;
-  });
-
-  gatewayProc.on("exit", (code, signal) => {
-    console.error(`[gateway] exited code=${code} signal=${signal}`);
-    gatewayProc = null;
-  });
-}
+ 
 
 async function ensureGatewayRunning() {
   if (!isConfigured()) return { ok: false, reason: "not configured" };
