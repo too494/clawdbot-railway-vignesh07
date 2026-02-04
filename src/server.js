@@ -129,6 +129,41 @@ async function startGateway() {
   fs.mkdirSync(STATE_DIR, { recursive: true });
   fs.mkdirSync(WORKSPACE_DIR, { recursive: true });
 
+  // Ensure Railway reverse proxy is trusted (loopback only).
+  // This prevents "Proxy headers detected from untrusted address" and WS connect failures (code=4008).
+  await runCmd(
+    OPENCLAW_NODE,
+    clawArgs(["config", "set", "--json", "gateway.trustedProxies", '["127.0.0.1","::1"]'])
+  );
+
+  const args = [
+    "gateway",
+    "run",
+    "--bind",
+    "loopback",
+    "--port",
+    String(INTERNAL_GATEWAY_PORT),
+    "--auth",
+    "token",
+    "--token",
+    OPENCLAW_GATEWAY_TOKEN,
+  ];
+
+  gatewayProc = childProcess.spawn(OPENCLAW_NODE, clawArgs(args), {
+    stdio: "inherit",
+    env: {
+      ...process.env,
+      OPENCLAW_STATE_DIR: STATE_DIR,
+      OPENCLAW_WORKSPACE_DIR: WORKSPACE_DIR,
+      // Backward-compat aliases
+      CLAWDBOT_STATE_DIR: process.env.CLAWDBOT_STATE_DIR || STATE_DIR,
+      CLAWDBOT_WORKSPACE_DIR: process.env.CLAWDBOT_WORKSPACE_DIR || WORKSPACE_DIR,
+    },
+  });
+
+  ...
+}
+
   const args = [
     "gateway",
     "run",
