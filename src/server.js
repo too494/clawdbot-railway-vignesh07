@@ -689,6 +689,10 @@ const ALLOWED_CONSOLE_COMMANDS = new Set([
 
     "openclaw.devices.list",
   "openclaw.devices.approve",
+
+    "openclaw.nodes.pending",
+  "openclaw.nodes.approve",
+
 ]);
 
 app.post("/setup/api/console/run", requireSetupAuth, async (req, res) => {
@@ -763,6 +767,17 @@ if (cmd === "openclaw.devices.approve") {
       error: "Missing device id"
     });
   }
+
+  if (cmd === "openclaw.nodes.pending") {
+      const r = await runCmd(OPENCLAW_NODE, clawArgs(["nodes", "pending"]));
+      return res.status(r.code === 0 ? 200 : 500).json({ ok: r.code === 0, output: redactSecrets(r.output) });
+    }
+
+    if (cmd === "openclaw.nodes.approve") {
+      if (!arg) return res.status(400).json({ ok: false, error: "Missing requestId" });
+      const r = await runCmd(OPENCLAW_NODE, clawArgs(["nodes", "approve", String(arg)]));
+      return res.status(r.code === 0 ? 200 : 500).json({ ok: r.code === 0, output: redactSecrets(r.output) });
+    }
 
   const r = await runCmd(
     OPENCLAW_NODE,
