@@ -686,6 +686,9 @@ const ALLOWED_CONSOLE_COMMANDS = new Set([
   "openclaw.doctor",
   "openclaw.logs.tail",
   "openclaw.config.get",
+
+    "openclaw.devices.list",
+  "openclaw.devices.approve",
 ]);
 
 app.post("/setup/api/console/run", requireSetupAuth, async (req, res) => {
@@ -742,6 +745,36 @@ app.post("/setup/api/console/run", requireSetupAuth, async (req, res) => {
       return res.status(r.code === 0 ? 200 : 500).json({ ok: r.code === 0, output: redactSecrets(r.output) });
     }
 
+if (cmd === "openclaw.devices.list") {
+  const r = await runCmd(
+    OPENCLAW_NODE,
+    clawArgs(["devices", "list"])
+  );
+  return res.status(r.code === 0 ? 200 : 500).json({
+    ok: r.code === 0,
+    output: r.output
+  });
+}
+
+if (cmd === "openclaw.devices.approve") {
+  if (!arg) {
+    return res.status(400).json({
+      ok: false,
+      error: "Missing device id"
+    });
+  }
+
+  const r = await runCmd(
+    OPENCLAW_NODE,
+    clawArgs(["devices", "approve", arg])
+  );
+
+  return res.status(r.code === 0 ? 200 : 500).json({
+    ok: r.code === 0,
+    output: r.output
+  });
+}
+    
     return res.status(400).json({ ok: false, error: "Unhandled command" });
   } catch (err) {
     return res.status(500).json({ ok: false, error: String(err) });
